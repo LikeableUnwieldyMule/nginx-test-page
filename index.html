@@ -6,19 +6,76 @@
     <title>Simple SAML Authentication</title>
 </head>
 <body>
-    <h1>Click below to authenticate with SAML</h1>
-    <!-- The form that will send the SAMLRequest to the IdP -->
-    <form action="https://login.microsoftonline.com/5945593b-3e9f-4298-8fc8-f3dcab7839e5/wsfed" method="post" id="samlForm">
-        <input name="SAMLRequest" value="PASTE-YOUR-BASE64-ENCODED-SAML-REQUEST-HERE">
-        <input name="RelayState" value="optional-relay-state-here">
+    <h1>Enter SAML Details</h1>
+
+    <!-- Form for input fields -->
+    <form id="samlForm">
+        <label for="issuer">Issuer:</label>
+        <input type="text" id="issuer" name="issuer" required><br><br>
+
+        <label for="destinationUrl">Destination URL:</label>
+        <input type="url" id="destinationUrl" name="destinationUrl" required><br><br>
+
+        <label for="issueInstant">Issue Instant:</label>
+        <input type="datetime-local" id="issueInstant" name="issueInstant" required><br><br>
+
+        <label for="destinationEntityId">Destination Entity ID:</label>
+        <input type="text" id="destinationEntityId" name="destinationEntityId" required><br><br>
+
+        <label for="assertionConsumerServiceUrl">Assertion Consumer Service URL:</label>
+        <input type="url" id="assertionConsumerServiceUrl" name="assertionConsumerServiceUrl" required><br><br>
+
+        <button type="button" onclick="generateSAMLRequest()">Generate SAML Request</button>
+    </form>
+
+    <h2>Generated SAML Request</h2>
+    <pre id="samlOutput"></pre>
+
+    <h2>Submit SAML Request</h2>
+    <form action="https://login.microsoftonline.com/5945593b-3e9f-4298-8fc8-f3dcab7839e5/wsfed" method="post" id="submitForm">
+        <input type="hidden" name="SAMLRequest" id="SAMLRequest">
+        <input type="hidden" name="RelayState" value="optional-relay-state-here">
         <button type="submit">Login with SSO</button>
     </form>
 
-    <!-- <script>
-        // Automatically submit the form when the page loads (you can also trigger it with a button click)
-        window.onload = function() {
-            document.getElementById('samlForm').submit();
-        };
-    </script> -->
+    <script>
+        function generateSAMLRequest() {
+            // Get input values
+            const issuer = document.getElementById('issuer').value;
+            const destinationUrl = document.getElementById('destinationUrl').value;
+            const issueInstant = document.getElementById('issueInstant').value;
+            const destinationEntityId = document.getElementById('destinationEntityId').value;
+            const assertionConsumerServiceUrl = document.getElementById('assertionConsumerServiceUrl').value;
+
+            // Create the SAML request XML
+            const samlRequest = `
+<samlp:AuthnRequest 
+    xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" 
+    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" 
+    ID="ID_${Date.now()}"
+    Version="2.0"
+    IssueInstant="${issueInstant}"
+    Destination="${destinationUrl}"
+    ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+    AssertionConsumerServiceURL="${assertionConsumerServiceUrl}">
+    
+    <saml:Issuer>${issuer}</saml:Issuer>
+    <samlp:NameIDPolicy AllowCreate="true"/>
+    <samlp:RequestedAuthnContext Comparison="exact">
+        <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml:AuthnContextClassRef>
+    </samlp:RequestedAuthnContext>
+</samlp:AuthnRequest>
+            `;
+
+            // Display the generated XML
+            document.getElementById('samlOutput').textContent = samlRequest;
+
+            // Encode the XML in base64
+            const encodedSAMLRequest = btoa(unescape(encodeURIComponent(samlRequest)));
+
+            // Set the base64-encoded request in the hidden form field
+            document.getElementById('SAMLRequest').value = encodedSAMLRequest;
+        }
+    </script>
 </body>
 </html>
