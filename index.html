@@ -1,12 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NGINX Test Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple SAML Authentication</title>
 </head>
 <body>
-  <h1>Welcome to NGINX!</h1>
-  <p>If you see this page, the NGINX web server is successfully installed and working!</p>
+    <h1>Click below to authenticate with SAML</h1>
+    <!-- The form that will send the SAMLRequest to the IdP -->
+    <form action="https://login.microsoftonline.com/5945593b-3e9f-4298-8fc8-f3dcab7839e5/wsfed" method="post" id="samlForm">
+        <input name="SAMLRequest" value="PASTE-YOUR-BASE64-ENCODED-SAML-REQUEST-HERE">
+        <input name="RelayState" value="optional-relay-state-here">
+        <button type="submit">Login with SSO</button>
+    </form>
+
+    <script>
+        // Automatically submit the form when the page loads (you can also trigger it with a button click)
+        window.onload = function() {
+            document.getElementById('samlForm').submit();
+        };
+    </script>
 </body>
 </html>
